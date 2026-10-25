@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 import { runMain } from "../dist/src/run.js";
 
@@ -348,8 +349,10 @@ test("the direct CLI rejects removed placeholder commands", async () => {
 });
 
 test("the direct CLI prints an ordinary uncaught error once", () => {
-  const entry = new URL("../dist/out/index.js", import.meta.url);
-  const result = spawnSync(process.execPath, [entry.pathname], {
+  // fileURLToPath, not URL#pathname: a checkout path with spaces would stay
+  // percent-encoded and Node would fail to find the entry.
+  const entry = fileURLToPath(new URL("../dist/out/index.js", import.meta.url));
+  const result = spawnSync(process.execPath, [entry], {
     input: 'throw new Error("single-error-probe")\n',
     encoding: "utf8",
   });
